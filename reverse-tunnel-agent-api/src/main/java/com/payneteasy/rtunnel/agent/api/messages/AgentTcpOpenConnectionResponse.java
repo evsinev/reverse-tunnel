@@ -1,14 +1,15 @@
 package com.payneteasy.rtunnel.agent.api.messages;
 
 import com.payneteasy.rtunnel.agent.api.messages.embed.AgentResponseIdentifier;
+import com.payneteasy.rtunnel.agent.api.messages.embed.AgentTcpConnectionParameters;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class AgentTcpPollDataResponse {
+public class AgentTcpOpenConnectionResponse {
 
-    private final AgentResponseIdentifier responseIdentifier;
-    private final String                  sessionId;
-
-    private final byte[] data;
+    private final AgentResponseIdentifier      responseIdentifier;
+    private final boolean                      shouldConnect;
+    private final AgentTcpConnectionParameters connectionParameters;
 
 }

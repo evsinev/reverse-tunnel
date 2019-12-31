@@ -1,4 +1,4 @@
-package com.payneteasy.reverseterminal.client.http;
+package com.payneteasy.rtunnel.agent.client.http;
 
 import com.google.gson.Gson;
 

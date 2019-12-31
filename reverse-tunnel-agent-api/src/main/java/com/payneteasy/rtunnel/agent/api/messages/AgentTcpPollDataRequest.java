@@ -4,10 +4,8 @@ import com.payneteasy.rtunnel.agent.api.messages.embed.AgentRequestIdentifier;
 import lombok.Data;
 
 @Data
-public class AgentTcpPushDataRequest {
+public class AgentTcpPollDataRequest {
 
     private final AgentRequestIdentifier requestIdentifier;
     private final String                 sessionId;
-
-    private final byte[] data;
 }

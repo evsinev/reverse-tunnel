@@ -4,32 +4,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-public class TcpSocketInputTask implements Runnable {
+public class TcpSocketOutputTask implements Runnable {
 
-    private final Logger        log;
-    private final Socket        socket;
-    private final ITcpShadow    shadow;
-    private final SocketAddress remoteAddress;
+    private final Logger            log;
+    private final Socket            socket;
+    private final ITcpSessionShadow shadow;
+    private final SocketAddress     remoteAddress;
 
-    public TcpSocketInputTask(String sessionId, Socket socket, ITcpShadow aShadow) {
+    public TcpSocketOutputTask(Socket socket, ITcpSessionShadow aShadow) {
         this.socket = socket;
         this.shadow = aShadow;
-        log = LoggerFactory.getLogger("tcp-socket-task-" + sessionId);
+        log = LoggerFactory.getLogger("tcp-socket-task-" + aShadow.getSessionId());
         remoteAddress = socket.getRemoteSocketAddress();
     }
 
     @Override
     public void run() {
         try {
-            try (InputStream in = socket.getInputStream()) {
-                byte[] buf = new byte[1024 * 20];
-                int    count;
-                while ((count = in.read(buf)) >= 0) {
-                    shadow.onIncomingBytes(buf, 0, count);
+            try (OutputStream out = socket.getOutputStream()) {
+                while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
+                    byte[] buffer = shadow.tcpPollBytes(55);
+                    if (buffer == null) {
+                        continue;
+                    }
+                    out.write(buffer);
                 }
                 closeSocket("Client closed socket");
             }

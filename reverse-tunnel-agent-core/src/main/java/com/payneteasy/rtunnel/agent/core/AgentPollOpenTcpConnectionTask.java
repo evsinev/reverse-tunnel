@@ -1,37 +1,44 @@
 package com.payneteasy.rtunnel.agent.core;
 
 import com.payneteasy.rtunnel.agent.api.IReverseTunnelAgentService;
-import com.payneteasy.rtunnel.agent.api.messages.AgentActionRequest;
-import com.payneteasy.rtunnel.agent.api.messages.AgentActionResponse;
+import com.payneteasy.rtunnel.agent.api.messages.AgentTcpOpenConnectionRequest;
+import com.payneteasy.rtunnel.agent.api.messages.AgentTcpOpenConnectionResponse;
 import com.payneteasy.rtunnel.agent.api.messages.embed.AgentRequestIdentifier;
+import com.payneteasy.rtunnel.agent.api.messages.embed.AgentTcpConnectionParameters;
 import com.payneteasy.rtunnel.agent.core.util.Sleeps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
-public class AgentPollActionTask implements Runnable {
+public class AgentPollOpenTcpConnectionTask implements Runnable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AgentPollActionTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AgentPollOpenTcpConnectionTask.class);
 
     private final IReverseTunnelAgentService agentClient;
-    private final IAgentSequenceGenerator sequenceGenerator;
-    private final String agentName;
+    private final IAgentSequenceGenerator    sequenceGenerator;
+    private final String                     agentName;
+    private final Executor                   executor;
 
-    public AgentPollActionTask(IReverseTunnelAgentService agentClient, IAgentSequenceGenerator sequenceGenerator, String agentName) {
+    public AgentPollOpenTcpConnectionTask(IReverseTunnelAgentService agentClient, IAgentSequenceGenerator sequenceGenerator, String agentName, Executor aExecutor) {
         this.agentClient = agentClient;
         this.sequenceGenerator = sequenceGenerator;
         this.agentName = agentName;
+        executor = aExecutor;
     }
 
     @Override
     public void run() {
-        while(!Thread.currentThread().isInterrupted()) {
+        while (!Thread.currentThread().isInterrupted()) {
             AgentRequestIdentifier requestId = new AgentRequestIdentifier(agentName, sequenceGenerator.nextSequence(), Thread.currentThread().getName());
-            AgentActionRequest     request   = new AgentActionRequest(requestId);
+            AgentTcpOpenConnectionRequest request = new AgentTcpOpenConnectionRequest(requestId);
             try {
-                AgentActionResponse    response = agentClient.pollAction(request);
-                processResponse(response);
+                AgentTcpOpenConnectionResponse response = agentClient.pollOpenConnection(request);
+                if(!response.isShouldConnect()) {
+                    continue;
+                }
+                openConnection(response.getConnectionParameters());
             } catch (IOException e) {
                 LOG.error("IO Error", e);
             } catch (Exception e) {
@@ -42,17 +49,7 @@ public class AgentPollActionTask implements Runnable {
         }
     }
 
-    private void processResponse(AgentActionResponse aResponse) {
-        switch (aResponse.getType()) {
-            case NO_ACTION:
-                return;
-
-            case CLOSE_TCP_CONNECTION:
-                LOG.warn("// todo implement close tcp connection");
-                return;
-
-            default:
-                throw new IllegalStateException("Unknown type " + aResponse.getType());
-        }
+    private void openConnection(AgentTcpConnectionParameters aParameters) {
+        executor.execute(new AgentTcpConnectionTask(agentClient, sequenceGenerator, agentName, executor, aParameters));
     }
 }

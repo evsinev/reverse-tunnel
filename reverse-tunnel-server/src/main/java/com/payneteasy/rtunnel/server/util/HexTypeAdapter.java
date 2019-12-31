@@ -1,4 +1,4 @@
-package com.payneteasy.rtunnel.agent.core.util;
+package com.payneteasy.rtunnel.server.util;
 
 import com.google.gson.*;
 import com.payneteasy.tlv.HexUtil;

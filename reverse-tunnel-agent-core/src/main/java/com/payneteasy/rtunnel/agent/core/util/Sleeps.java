@@ -1,4 +1,4 @@
-package com.payneteasy.rtunnel.server.util;
+package com.payneteasy.rtunnel.agent.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

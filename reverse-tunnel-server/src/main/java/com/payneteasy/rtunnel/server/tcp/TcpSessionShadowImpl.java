@@ -6,12 +6,17 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class TcpShadowImpl implements ITcpShadow {
+public class TcpSessionShadowImpl implements ITcpSessionShadow {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TcpShadowImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TcpSessionShadowImpl.class);
 
     private final ArrayBlockingQueue<byte[]> tcpToHttpQueue = new ArrayBlockingQueue<>(1024);
     private final ArrayBlockingQueue<byte[]> httpToTcpQueue = new ArrayBlockingQueue<>(1024);
+    private final String                     sessionId;
+
+    public TcpSessionShadowImpl(String sessionId) {
+        this.sessionId = sessionId;
+    }
 
     @Override
     public void tcpAddBytesToHttp(byte[] aBuffer) {
@@ -44,5 +49,17 @@ public class TcpShadowImpl implements ITcpShadow {
             Thread.currentThread().interrupt();
             return new byte[0];
         }
+    }
+
+    @Override
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    @Override
+    public String toString() {
+        return "TcpSessionShadowImpl{" +
+                "sessionId='" + sessionId + '\'' +
+                '}';
     }
 }

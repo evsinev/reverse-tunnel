@@ -1,14 +1,10 @@
-package com.payneteasy.reverseterminal.client.http;
+package com.payneteasy.rtunnel.agent.client.http;
 
 import com.google.gson.Gson;
-import com.payneteasy.android.sdk.logger.ILogger;
-import com.payneteasy.android.sdk.logger.SdkLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -18,12 +14,14 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 public class HttpClient implements Closeable {
 
-    private final static ILogger LOG = SdkLoggerFactory.getLogger(HttpClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpClient.class);
+
 
     private final String              uploadUrl;
     private final HttpURLConnection   connection;
     private final Gson                gson;
     private final IHttpClientListener listener;
+    private final int                 readTimeout;
 
     public HttpClient(String aUploadUrl, HttpClientParameters aParams) throws IOException {
         this(aUploadUrl, aParams, new HttpClientListenerNoOp());
@@ -36,6 +34,8 @@ public class HttpClient implements Closeable {
     public HttpClient(String aUploadUrl, int aConnectionTimeoutMs, int aReadTimeoutMs, Map<String, String> aHeaders, Gson aGson, IHttpClientListener aListener) throws IOException {
         gson = aGson;
         listener = aListener;
+        readTimeout = aReadTimeoutMs;
+
         HttpURLConnection.setFollowRedirects(false);
 
         uploadUrl  = aUploadUrl;
@@ -89,7 +89,7 @@ public class HttpClient implements Closeable {
     }
 
     private int waitForResponseCode() throws IOException {
-        LOG.debug("Waiting for response code ...");
+        LOG.debug("Waiting for response code with timeout {}ms ...", readTimeout);
         int responseCode = connection.getResponseCode();
         if (responseCode != HTTP_OK) {
             throw new IOException("Response code is " + responseCode + " for url " + uploadUrl);

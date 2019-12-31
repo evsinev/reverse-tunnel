@@ -1,11 +1,12 @@
-package com.payneteasy.reverseterminal.client.http;
+package com.payneteasy.rtunnel.agent.client.http;
 
-import com.payneteasy.android.sdk.logger.ILogger;
-import com.payneteasy.android.sdk.logger.SdkLoggerFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpClientListenerNoOp implements IHttpClientListener {
 
-    private final static ILogger LOG = SdkLoggerFactory.getLogger(HttpClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpClientListenerNoOp.class);
 
     @Override
     public void onConnecting() {

@@ -15,10 +15,21 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.payneteasy.reverse-tunnel</groupId>
+            <artifactId>reverse-tunnel-agent-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.payneteasy</groupId>
             <artifactId>ber-tlv</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.payneteasy</groupId>
+            <artifactId>startup-parameters</artifactId>
+            <version>1.0-5</version>
+        </dependency>
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -69,7 +80,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.payneteasy.usbtcp.UsbTcpServerApplication</mainClass>
+                                    <mainClass>com.payneteasy.rtunnel.main.TunnelAgentApplication</mainClass>
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                             </archive>

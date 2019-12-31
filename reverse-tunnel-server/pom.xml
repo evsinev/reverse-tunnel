@@ -102,7 +102,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.payneteasy.usbtcp.UsbTcpServerApplication</mainClass>
+                                    <mainClass>com.payneteasy.rtunnel.server.TunnelServerApplication</mainClass>
                                     <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                                 </manifest>
                             </archive>
