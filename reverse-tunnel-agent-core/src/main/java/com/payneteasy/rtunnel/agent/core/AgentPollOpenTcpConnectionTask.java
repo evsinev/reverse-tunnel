@@ -36,11 +36,15 @@ public class AgentPollOpenTcpConnectionTask implements Runnable {
             try {
                 AgentTcpOpenConnectionResponse response = agentClient.pollOpenConnection(request);
                 if(!response.isShouldConnect()) {
+                    LOG.info("Sleeping 5 seconds on error connection ...");
+                    Sleeps.sleepSeconds(5);
                     continue;
                 }
                 openConnection(response.getConnectionParameters());
             } catch (IOException e) {
-                LOG.error("IO Error", e);
+                LOG.error("IO Error connection", e);
+                LOG.warn("Sleeping 5 seconds on IO error while connecting ...");
+                Sleeps.sleepSeconds(5);
             } catch (Exception e) {
                 LOG.error("Unknown error", e);
             } finally {

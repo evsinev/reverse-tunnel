@@ -33,10 +33,13 @@ public class AgentPollActionTask implements Runnable {
                 AgentActionResponse    response = agentClient.pollAction(request);
                 processResponse(response);
             } catch (IOException e) {
-                LOG.error("IO Error", e);
+                LOG.error("IO Error polling", e);
+                LOG.warn("Sleeping 5 seconds on IO error while polling ...");
+                Sleeps.sleepSeconds(5);
             } catch (Exception e) {
                 LOG.error("Unknown error", e);
             } finally {
+                LOG.info("Sleeping 1 seconds between polling ...");
                 Sleeps.sleepSeconds(1);
             }
         }
