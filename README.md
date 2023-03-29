@@ -1,5 +1,10 @@
 The application allows make a connection 
 to the server behind a firewall.
+           
+## Modules
+
+* reverse-tunnel-agent-client – agent application. It connects to the bridge via https.
+* reverse-tunnel-server – bridge. an http server.
 
 ## Diagram
 
