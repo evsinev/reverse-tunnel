@@ -1,0 +1,150 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+'autoactivate on
+autonumber "<b>00"
+
+Box "Local" #LightBlue
+Actor User
+Participant "rdesktop client" as rdp_client
+Participant "tunnel bridge"   as bridge
+Box end
+
+Box Remote #LightGray
+Participant "tunnel agent"    as agent
+Participant "rdesktop server" as rdp_server
+Box end
+
+loop long polling for new connections
+agent ->  bridge: opens https://bridge/reverse-tunnel-01
+note right
+request:
+{
+  "requestId": {
+    "agentName": "agent-01",
+    "sequenceNumber": 2,
+    "threadName": "main"
+  }
+}
+end note
+
+bridge --> agent: long polling response
+
+note left
+response after 60 seconds if no connection:
+{
+  "responseIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 2
+  },
+  "shouldConnect": false
+}
+end note
+
+
+end ' loop long polling
+
+group "Open tcp connection"
+
+rdp_client -> bridge: open 13389
+
+bridge -> agent: open TCP
+note right
+long polling response
+{
+  "responseIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 135
+  },
+  "shouldConnect": true,
+  "connectionParameters": {
+    "sessionId": "9f...44",
+    "address": "localhost",
+    "port": 3389,
+    "connectionTimeoutMs": 10000,
+    "readTimeoutMs": 120000
+  }
+}
+end note
+
+agent -> rdp_server: open localhost:3389
+rdp_server -->  agent: port opened
+
+agent -> bridge: Notify on port opened\n POST /reverse-tunnel-8f...7c/agent/poll-open-tcp/agent-01/37
+
+note right
+{
+  "requestIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 37,
+    "threadName": "Thread-0"
+  }
+}
+end note
+
+bridge --> rdp_client: opened
+
+end ' group "Open tcp connection"
+
+loop "long polling for data"
+
+agent -> bridge: pull data\nPOST /reverse-tunnel-8f...7c/agent/poll-tcp-data/agent-01/136
+note right
+{
+  "requestIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 136,
+    "threadName": "pool-1-thread-5"
+  },
+  "sessionId": "agent-01"
+}
+
+
+end note
+
+
+end ' loop long polling for connection
+
+group "RDP client sends data to RDP server"
+
+rdp_client -> bridge: send bytes "53...0A"
+
+bridge --> agent: long polling response
+note left
+{
+  "responseIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 136
+  },
+  "sessionId": "agent-01",
+  "data": "53...0A"
+}
+end note
+
+agent --> rdp_server: send bytes "53...0A"
+
+end ' group "RDP client sends data to RDP server"
+
+group "RDP server send data to RDP client"
+
+rdp_server -> agent: Send bytes "02...03"
+
+agent -> bridge: send data \nPOST /reverse-tunnel-8f...7c/agent/push-tcp-data/agent-01/137
+note left
+{
+  "requestIdentifier": {
+    "agentName": "agent-01",
+    "sequenceNumber": 137,
+    "threadName": "pool-1-thread-6"
+  },
+  "sessionId": "agent-01",
+  "data": "02...03"
+}
+end note
+
+bridge -> rdp_client: Sends bytes "02...03"
+
+end ' group "RDP server send data to RDP client"
+
+
+@enduml
