@@ -18,10 +18,12 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <logback.version> 1.1.11  </logback.version>
-        <slf4j.version>   1.7.25 </slf4j.version>
+        <!-- logback 1.6.x and slf4j 2.x require Java 11, Jetty 12 requires Java 17 (server module only) -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <logback.version>1.6.5</logback.version>
+        <slf4j.version>2.0.19</slf4j.version>
 
-        <jetty.version>9.4.15.v20190215</jetty.version>
+        <jetty.version>12.1.14</jetty.version>
 
         <jacoco.basedir>${project.basedir}/../target/coverage</jacoco.basedir>
         <jacoco.version>0.8.0</jacoco.version>
@@ -49,16 +51,6 @@
         <tag>HEAD</tag>
     </scm>
 
-
-    <repositories>
-        <repository>
-            <id>paynet-release</id>
-            <name>Local Maven repository of releases</name>
-            <url>http://repo.clubber.me/nexus/content/repositories/paynet-release</url>
-        </repository>
-
-    </repositories>
-
     <dependencyManagement>
         <dependencies>
 
@@ -84,20 +76,20 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.10</version>
+                <version>1.18.42</version>
                 <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.2.4</version>
+                <version>2.14.0</version>
             </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.8.1</version>
+                <version>4.13.2</version>
                 <!--<scope>test</scope>-->
             </dependency>
 
@@ -146,16 +138,20 @@
                 <version>${slf4j.version}</version>
             </dependency>
 
+            <!-- Jetty 9.4 is EOL; Jetty 12 EE8 keeps the javax.servlet API used by api-servlet -->
             <dependency>
                 <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
+                <artifactId>jetty-bom</artifactId>
                 <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-client</artifactId>
+                <groupId>org.eclipse.jetty.ee8</groupId>
+                <artifactId>jetty-ee8-bom</artifactId>
                 <version>${jetty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             
@@ -164,14 +160,7 @@
                 <artifactId>ber-tlv</artifactId>
                 <version>1.0-9</version>
             </dependency>
-
-
-            <dependency>
-                <groupId>org.usb4java</groupId>
-                <artifactId>usb4java</artifactId>
-                <version>1.3.0</version>
-            </dependency>
-            
+ 
         </dependencies>
     </dependencyManagement>
 
@@ -180,10 +169,9 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
+                    <version>3.14.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <release>${maven.compiler.release}</release>
                     </configuration>
                 </plugin>
 
