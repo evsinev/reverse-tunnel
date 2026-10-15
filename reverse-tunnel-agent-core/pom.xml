@@ -59,11 +59,6 @@
             <artifactId>jul-to-slf4j</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.usb4java</groupId>
-            <artifactId>usb4java</artifactId>
-        </dependency>
-
     </dependencies>
 
     <profiles>
